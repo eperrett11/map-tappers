@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binyan Map Tappers Leaderboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky:#4EB6EF;
+    --sky-deep:#1E8FCC;
+    --sky-pale:#EAF7FF;
+    --ink:#182B45;
+    --sun:#FFC93C;
+    --sun-deep:#F0A500;
+    --coral:#FF6152;
+    --silver:#D9E2EC;
+    --silver-deep:#93A3B5;
+    --bronze:#E0A972;
+    --bronze-deep:#B97D3E;
+    --card:#FFFFFF;
+    --muted:#8C9AAE;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(circle at 8% 12%, rgba(255,255,255,0.16) 0, transparent 40%),
+      radial-gradient(circle at 92% 85%, rgba(255,255,255,0.12) 0, transparent 45%),
+      linear-gradient(180deg, var(--sky) 0%, var(--sky-deep) 100%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family:'Nunito', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{ max-width: 780px; margin: 0 auto; padding: 48px 18px 80px; }
+
+  /* ---------- Header ---------- */
+  header{ display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom: 36px; }
+  .pin{ width:72px; height:72px; margin-bottom:8px; filter: drop-shadow(0 4px 0 rgba(24,43,69,0.25)); }
+  .wordmark{
+    font-family:'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(28px, 8vw, 42px);
+    line-height:1.1;
+    color: #FFFFFF;
+    text-shadow: 3px 3px 0 var(--ink);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .badge-pill{
+    margin-top: 12px;
+    font-family:'Fredoka', sans-serif; font-weight: 600; font-size: 13px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.9);
+    text-shadow: 1px 1px 0 rgba(24,43,69,0.4);
+  }
+  .rules-btn{
+    margin-top: 16px;
+    display:inline-flex; align-items:center; gap:7px;
+    padding: 9px 20px;
+    background: #fff; border: 2.5px solid var(--ink); border-radius: 999px;
+    font-family:'Fredoka', sans-serif; font-weight: 600; font-size: 13px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink); cursor:pointer;
+    box-shadow: 3px 3px 0 rgba(24,43,69,0.4);
+  }
+  .rules-btn:hover{ transform: translateY(-1px); }
+  .rules-btn:active{ transform: translateY(1px); box-shadow: 1px 1px 0 rgba(24,43,69,0.4); }
+
+  /* ---------- Section headings ---------- */
+  section{ margin-bottom: 40px; }
+  .section-head{
+    margin: 0 0 14px;
+    display:flex; align-items:center; justify-content:space-between; gap: 10px; flex-wrap:wrap;
+  }
+  .updated-tag{
+    font-family:'Nunito', sans-serif; font-weight: 700; font-size: 11.5px;
+    color: rgba(255,255,255,0.8);
+    letter-spacing:0.03em;
+  }
+  .section-head h2{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 24px; margin:0;
+    color:#fff; text-shadow: 2px 2px 0 rgba(24,43,69,0.35);
+  }
+  .section-head h2.sub{ font-size:20px; }
+  .title-row{ display:flex; align-items:center; gap: 10px; flex-wrap:wrap; }
+  .countdown-sub{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 14px;
+    color: var(--sun); text-shadow: 1px 1px 0 rgba(24,43,69,0.4);
+  }
+
+  /* ---------- Standings row (shared: current month + player-click) ---------- */
+  .standings{ display:flex; flex-direction:column; gap: 10px; }
+  .row{
+    display:flex; align-items:center; gap:14px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 4px 4px 0 rgba(24,43,69,0.5);
+    opacity:1;
+    animation: rise 0.45s cubic-bezier(.2,.9,.3,1.3) forwards;
+    cursor:pointer;
+    transition: transform 0.1s ease;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(10px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .row:hover{ transform: scale(1.035); }
+  .row:focus-visible{ outline: 3px solid var(--coral); outline-offset: 2px; }
+  .tap-hint{ flex: 0 0 auto; font-size: 18px; color: rgba(24,43,69,0.25); font-weight:700; }
+
+  .badge{
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka', sans-serif; font-weight: 600; font-size: 15px;
+    color: var(--ink); background: var(--sky-pale); border: 2.5px solid var(--ink);
+  }
+  .row.rank-1{ background: var(--sun); box-shadow: 5px 5px 0 rgba(24,43,69,0.55); }
+  .row.rank-1 .badge{ background:#FFFFFF; box-shadow: 0 0 0 3px var(--sun) inset; }
+  .row.rank-2{ background: var(--silver); }
+  .row.rank-2 .badge{ background:#FFFFFF; box-shadow: 0 0 0 3px var(--silver-deep) inset; }
+  .row.rank-3{ background: var(--bronze); }
+  .row.rank-3 .badge{ background:#FFFFFF; box-shadow: 0 0 0 3px var(--bronze-deep) inset; }
+
+  .row.unqualified{
+    background: rgba(255,255,255,0.55);
+    box-shadow: 3px 3px 0 rgba(24,43,69,0.25);
+    border-color: rgba(24,43,69,0.35);
+  }
+  .row.unqualified .badge{ background: transparent; border-color: rgba(24,43,69,0.3); color: var(--muted); }
+  .row.unqualified .name{ color: rgba(24,43,69,0.55); }
+
+  .who{ flex: 1 1 auto; min-width:0; }
+  .name{
+    font-weight:800; font-size: 16px; color: var(--ink);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .medal{ font-size:32px; line-height:1; }
+
+  .stats{ flex: 0 0 auto; display:flex; align-items:center; gap: 14px; }
+  .stat{ text-align:center; }
+  .stat .num{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 22px;
+    font-variant-numeric: tabular-nums; color: var(--ink); line-height:1;
+  }
+  .stat .num.zero{ color: var(--muted); font-weight:600; }
+  .stat .lbl{
+    font-size: 9.5px; font-weight: 700; color: var(--muted);
+    letter-spacing:0.03em; text-transform:uppercase; margin-top:2px;
+  }
+  .row.rank-1 .stat .lbl, .row.rank-2 .stat .lbl, .row.rank-3 .stat .lbl{ color: rgba(24,43,69,0.6); }
+
+  .empty-note{ color: rgba(255,255,255,0.85); font-size: 13px; padding: 10px 4px; font-weight:700; }
+
+  /* ---------- Modals (shared: rules + player stats) ---------- */
+  .modal-overlay{
+    position: fixed; inset:0; background: rgba(24,43,69,0.55);
+    display:flex; align-items:center; justify-content:center; padding: 20px;
+    opacity:0; pointer-events:none; transition: opacity 0.18s ease; z-index: 50;
+  }
+  .modal-overlay.open{ opacity:1; pointer-events:auto; }
+  .modal-card{
+    background:#fff; border: 3px solid var(--ink); border-radius: 20px;
+    box-shadow: 6px 6px 0 rgba(24,43,69,0.5);
+    max-width: 460px; width:100%; max-height: 82vh; overflow-y:auto;
+    padding: 26px 26px 22px; position:relative;
+    transform: scale(0.94) translateY(8px); transition: transform 0.18s ease;
+  }
+  .modal-overlay.open .modal-card{ transform: scale(1) translateY(0); }
+  .modal-card h3{ font-family:'Fredoka', sans-serif; font-weight:600; font-size: 21px; margin: 0 0 14px; padding-right: 30px; }
+  .modal-card p{ font-size:14px; line-height:1.6; margin: 0 0 12px; font-weight:600; }
+  .modal-card p strong{ color: var(--sun-deep); }
+  .modal-close{
+    position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%;
+    border: 2.5px solid var(--ink); background:#fff;
+    font-family:'Fredoka', sans-serif; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .stat-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .stat-tile{
+    background: var(--sky-pale); border: 2.5px solid var(--ink); border-radius: 14px;
+    padding: 12px 12px 10px; text-align:center;
+  }
+  .stat-tile .stat-num{ font-family:'Fredoka', sans-serif; font-weight:700; font-size: 21px; color: var(--ink); }
+  .stat-tile .stat-lbl{ font-size: 10px; font-weight:700; color: var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-top:3px; }
+
+  /* ---------- Past months: every month shown at once, compact cards ---------- */
+  .months-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px){ .months-grid{ grid-template-columns: 1fr; } }
+  .month-card.hidden-month{ display:none; }
+  .show-more-wrap{ text-align:center; margin-top: 16px; }
+  .show-more-btn{
+    display:inline-flex; align-items:center; gap:7px;
+    padding: 9px 20px;
+    background:#fff; border: 2.5px solid var(--ink); border-radius: 999px;
+    font-family:'Fredoka', sans-serif; font-weight: 600; font-size: 13px;
+    letter-spacing: 0.04em; color: var(--ink); cursor:pointer;
+    box-shadow: 3px 3px 0 rgba(24,43,69,0.4);
+  }
+  .show-more-btn:active{ transform: translateY(1px); box-shadow: 1px 1px 0 rgba(24,43,69,0.4); }
+
+  .month-card{
+    background:#fff; border: 3px solid var(--ink); border-radius: 18px;
+    box-shadow: 4px 4px 0 rgba(24,43,69,0.5);
+    overflow:hidden;
+  }
+  .month-card-head{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 17px;
+    letter-spacing: 0.03em; text-transform: uppercase;
+    padding: 12px 14px; background: #ECEFF3;
+    border-bottom: 3px solid var(--ink);
+    text-align:center;
+  }
+  .mc-row{
+    display:flex; align-items:center; gap: 10px;
+    padding: 10px 14px;
+    border-top: 1.5px solid rgba(24,43,69,0.15);
+    border-left: 4px solid transparent;
+  }
+  .mc-row:first-child{ border-top:none; }
+  .mc-row.mc-1{ border-left-color: var(--sun-deep); padding: 12px 14px 12px 11px; }
+  .mc-badge{
+    flex: 0 0 auto;
+    font-size: 24px; line-height:1;
+  }
+  .mc-row.mc-1 .mc-badge{ font-size: 29px; }
+  .mc-name{ font-weight:800; font-size: 13.5px; color: var(--ink); flex: 1 1 auto; min-width:0; }
+  .mc-row.mc-1 .mc-name{ font-size: 15px; }
+  .mc-score{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 16px; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .mc-row.mc-1 .mc-score{ font-size: 18px; font-weight:700; }
+  /* ---------- Trophy cabinet: only players with month wins, as trophy chips ---------- */
+  .cabinet{ display:flex; flex-direction:column; gap: 10px; }
+  .cab-row{
+    display:flex; align-items:center; gap: 14px;
+    padding: 12px 16px;
+    background:#fff; border: 3px solid var(--ink); border-radius: 16px;
+    box-shadow: 4px 4px 0 rgba(24,43,69,0.5);
+  }
+  .cab-name{ flex: 1 1 auto; min-width:0; font-weight:800; font-size: 15.5px; color: var(--ink); }
+  .cab-trophies{ font-size: 22px; line-height:1; letter-spacing: 2px; }
+  .cab-count{
+    flex: 0 0 auto;
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 15px; color: var(--sun-deep);
+    font-variant-numeric: tabular-nums;
+  }
+  .cabinet-empty{
+    background: rgba(255,255,255,0.85); border: 2.5px dashed var(--ink); border-radius: 16px;
+    padding: 20px; text-align:center; color: var(--ink); font-weight:700; font-size: 13.5px;
+  }
+
+  /* ---------- Compare players: sortable stat table ---------- */
+  .table-wrap{
+    background:#fff; border: 3px solid var(--ink); border-radius: 18px;
+    box-shadow: 4px 4px 0 rgba(24,43,69,0.5);
+    overflow-x:auto;
+  }
+  table.compare{ width:100%; border-collapse: collapse; font-variant-numeric: tabular-nums; table-layout: fixed; }
+  table.compare th, table.compare td{ padding: 10px 6px; text-align:center; }
+  table.compare td{ white-space:nowrap; }
+  table.compare th:first-child, table.compare td:first-child{ padding-left: 12px; width: 24%; }
+  table.compare tbody td:first-child{ text-align:left; }
+  table.compare td:first-child{ white-space:normal; word-break: break-word; }
+  table.compare thead th{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 10px;
+    text-transform:uppercase; letter-spacing:0.01em; color: var(--ink);
+    background: var(--sky-pale); border-bottom: 3px solid var(--ink);
+    cursor:pointer; user-select:none;
+    text-align:center;
+    white-space:normal; line-height:1.25; vertical-align: bottom;
+    position: relative; padding-bottom: 20px;
+  }
+  table.compare thead th:hover{ background:#dcefff; }
+  table.compare thead th:focus-visible{ outline: 3px solid var(--coral); outline-offset: -3px; }
+  table.compare thead th.sorted{ background: var(--sun); }
+  table.compare thead th .arrow{
+    position:absolute; left:50%; transform:translateX(-50%);
+    bottom: 6px; font-size: 9px; opacity:0.7; margin:0;
+  }
+  table.compare thead th .arrow-hidden{ visibility: hidden; }
+  table.compare tbody td{ border-top: 1.5px solid rgba(24,43,69,0.12); font-weight:700; font-size: 12.5px; color: var(--ink); }
+  table.compare tbody td:first-child{ font-weight:800; }
+  table.compare tbody tr:nth-child(even){ background: rgba(234,247,255,0.5); }
+  @media (max-width: 560px){
+    table.compare thead th{ font-size: 8.5px; padding: 8px 3px; }
+    table.compare tbody td{ font-size: 11px; padding: 8px 3px; }
+    table.compare th:first-child, table.compare td:first-child{ padding-left: 8px; width: 26%; }
+  }
+
+  footer{ text-align:center; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.8); letter-spacing:0.03em; margin-top: 36px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="pin" viewBox="0 0 72 72" fill="none" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id="globeClip"><circle cx="34" cy="38" r="26"/></clipPath>
+      </defs>
+      <!-- ocean -->
+      <circle cx="34" cy="38" r="26" fill="#4EB6EF" stroke="#182B45" stroke-width="3.5"/>
+      <g clip-path="url(#globeClip)">
+        <!-- graticule -->
+        <path d="M8 38h52M10 27h48M10 49h48" stroke="#182B45" stroke-width="1.6" opacity="0.3"/>
+        <ellipse cx="34" cy="38" rx="12" ry="26" stroke="#182B45" stroke-width="1.6" opacity="0.3"/>
+        <!-- North America -->
+        <path d="M12 20c5-2 12-1 16 2 3 2 1 5-2 6-2 1-3 3-5 4-2 1-3-1-4-3-2-3-6-4-7-7 0-1 1-2 2-2Z"
+              fill="#2FD08A" stroke="#182B45" stroke-width="1.8" stroke-linejoin="round"/>
+        <!-- South America -->
+        <path d="M21 34c3-1 5 1 5 4 0 4-1 8-3 11-1 2-4 2-5 0-1-4 0-8 1-11 0-2 1-3 2-4Z"
+              fill="#2FD08A" stroke="#182B45" stroke-width="1.8" stroke-linejoin="round"/>
+        <!-- Europe / Africa -->
+        <path d="M38 22c4-1 8 0 10 2 1 2-1 4-3 5 1 3 2 6 1 9-1 4-3 8-6 10-2 1-4 0-4-3-1-5 0-10 1-15-1-3-1-6 1-8Z"
+              fill="#2FD08A" stroke="#182B45" stroke-width="1.8" stroke-linejoin="round"/>
+        <!-- Asia -->
+        <path d="M50 20c6 1 10 4 12 8 1 3-2 5-5 5-3 1-6-1-8-3-2-3-3-6-2-8 0-2 2-2 3-2Z"
+              fill="#2FD08A" stroke="#182B45" stroke-width="1.8" stroke-linejoin="round"/>
+        <!-- Australia -->
+        <path d="M53 46c3-1 6 1 6 4s-3 5-6 4-4-3-3-5c0-2 1-3 3-3Z"
+              fill="#2FD08A" stroke="#182B45" stroke-width="1.8" stroke-linejoin="round"/>
+      </g>
+      <!-- map pin planted on the globe -->
+      <path d="M50 6c-6.6 0-12 4.9-12 11.1C38 25.5 50 35 50 35s12-9.5 12-17.9C62 10.9 56.6 6 50 6Z" fill="#FF6152" stroke="#182B45" stroke-width="3.5" stroke-linejoin="round"/>
+      <circle cx="50" cy="17" r="4.6" fill="#FFC93C" stroke="#182B45" stroke-width="2.6"/>
+    </svg>
+    <h1 class="wordmark">Binyan Map Tappers</h1>
+    <div class="badge-pill" id="live-pill">🟢 Live Leaderboard</div>
+    <button class="rules-btn" id="rules-btn" aria-haspopup="dialog">📜 Rules</button>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <div class="title-row">
+        <h2 id="month-title">Standings</h2>
+        <div class="countdown-sub" id="countdown-sub"></div>
+      </div>
+      <div class="updated-tag" id="updated-tag"></div>
+    </div>
+    <div class="standings" id="standings"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2 class="sub">Past Months</h2>
+    </div>
+    <div class="months-grid" id="archive-board"></div>
+    <div class="show-more-wrap" id="show-more-wrap"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2 class="sub">🏆 Trophy Cabinet</h2>
+      <div class="updated-tag">Month wins all-time</div>
+    </div>
+    <div class="cabinet" id="cabinet"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2 class="sub">Compare Players</h2>
+      <div class="updated-tag">Tap a column to sort</div>
+    </div>
+    <div class="table-wrap">
+      <table class="compare" id="compare-table"></table>
+    </div>
+  </section>
+
+  <footer id="footer-note"></footer>
+</div>
+
+<div class="modal-overlay" id="rules-overlay">
+  <div class="modal-card">
+    <button class="modal-close" id="rules-close">✕</button>
+    <h3>How Map Tappers Works</h3>
+    <p>Scores are scraped automatically via a script from the group chat at the end of each day.</p>
+    <p>The main leaderboard is just for the <strong>current month</strong>. At the end of the month, whoever's on top is that month's winner — then the board starts fresh the next month.</p>
+    <p>Your leaderboard rank is the <strong>average of your best ten rounds</strong> for the month.</p>
+    <p>You need to log <strong>at least ten rounds</strong> in a month to appear on the board. Until you hit ten, you'll sit at <strong>0</strong> with a "not enough rounds yet" note.</p>
+    <p>Because only your ten best rounds count, any extra scores beyond those can't drag your rank down.</p>
+    <p><strong>Past Months</strong> shows the top 3 finishers for any earlier month.</p>
+    <p>A <strong>win</strong> means finishing 1st at the end of a month. Wins are counted in the Trophy Cabinet and the Compare Players table — one trophy for each month you've topped the board.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="player-overlay">
+  <div class="modal-card">
+    <button class="modal-close" id="player-close">✕</button>
+    <h3 id="player-name-title"></h3>
+    <div class="stat-grid" id="player-stats"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {"players":["Bec Byrne","Cassidy Storms","Eli Perrett","Marta Paterlini","Matthew Chater","Miranda Romer","Phoebe Duckworth","Sarah Cope","Maciej Kozlowski","Tavia Hunter","Leah Roberts","Jordan Samuels"],"records":[{"date":"2025-12-31","scores":{"Marta Paterlini":697,"Miranda Romer":831}},{"date":"2026-04-15","scores":{"Eli Perrett":841,"Phoebe Duckworth":694,"Sarah Cope":550}},{"date":"2026-04-16","scores":{"Eli Perrett":737,"Phoebe Duckworth":744,"Sarah Cope":873}},{"date":"2026-04-17","scores":{"Eli Perrett":758,"Phoebe Duckworth":816,"Sarah Cope":664}},{"date":"2026-04-20","scores":{"Eli Perrett":945,"Phoebe Duckworth":610}},{"date":"2026-04-21","scores":{"Eli Perrett":679,"Phoebe Duckworth":849,"Sarah Cope":717}},{"date":"2026-04-22","scores":{"Eli Perrett":803,"Phoebe Duckworth":691,"Sarah Cope":763}},{"date":"2026-04-23","scores":{"Eli Perrett":871,"Phoebe Duckworth":692,"Sarah Cope":718,"Leah Roberts":651}},{"date":"2026-04-24","scores":{"Eli Perrett":845,"Phoebe Duckworth":804,"Sarah Cope":750}},{"date":"2026-04-27","scores":{"Eli Perrett":545,"Phoebe Duckworth":738,"Sarah Cope":675,"Leah Roberts":503}},{"date":"2026-04-28","scores":{"Eli Perrett":928,"Marta Paterlini":790,"Phoebe Duckworth":677,"Sarah Cope":449,"Leah Roberts":537}},{"date":"2026-04-29","scores":{"Bec Byrne":847,"Cassidy Storms":926,"Eli Perrett":913,"Marta Paterlini":904,"Matthew Chater":905,"Miranda Romer":914,"Phoebe Duckworth":860,"Sarah Cope":923}},{"date":"2026-04-30","scores":{"Cassidy Storms":818,"Eli Perrett":911,"Marta Paterlini":923,"Matthew Chater":960,"Miranda Romer":957,"Sarah Cope":919,"Leah Roberts":777}},{"date":"2026-05-01","scores":{"Bec Byrne":769,"Cassidy Storms":810,"Eli Perrett":865,"Marta Paterlini":858,"Matthew Chater":863,"Miranda Romer":867,"Sarah Cope":763,"Leah Roberts":675}},{"date":"2026-05-04","scores":{"Bec Byrne":804,"Cassidy Storms":739,"Eli Perrett":849,"Marta Paterlini":894,"Miranda Romer":872}},{"date":"2026-05-05","scores":{"Bec Byrne":869,"Cassidy Storms":891,"Eli Perrett":782,"Marta Paterlini":785,"Matthew Chater":802,"Miranda Romer":657,"Phoebe Duckworth":739,"Sarah Cope":604}},{"date":"2026-05-06","scores":{"Bec Byrne":906,"Cassidy Storms":923,"Eli Perrett":896,"Marta Paterlini":940,"Miranda Romer":882,"Phoebe Duckworth":818,"Sarah Cope":864}},{"date":"2026-05-07","scores":{"Bec Byrne":701,"Cassidy Storms":814,"Eli Perrett":746,"Marta Paterlini":849,"Miranda Romer":803,"Phoebe Duckworth":776,"Sarah Cope":684}},{"date":"2026-05-08","scores":{"Bec Byrne":648,"Cassidy Storms":726,"Eli Perrett":776,"Marta Paterlini":878,"Matthew Chater":537,"Miranda Romer":883,"Phoebe Duckworth":792,"Sarah Cope":752,"Leah Roberts":810}},{"date":"2026-05-11","scores":{"Bec Byrne":715,"Cassidy Storms":821,"Eli Perrett":705,"Marta Paterlini":863,"Matthew Chater":899,"Phoebe Duckworth":651}},{"date":"2026-05-12","scores":{"Bec Byrne":812,"Cassidy Storms":921,"Eli Perrett":837,"Marta Paterlini":960,"Matthew Chater":895,"Miranda Romer":832,"Phoebe Duckworth":905}},{"date":"2026-05-13","scores":{"Bec Byrne":882,"Cassidy Storms":951,"Eli Perrett":952,"Marta Paterlini":951,"Matthew Chater":934,"Miranda Romer":916,"Phoebe Duckworth":837,"Tavia Hunter":702}},{"date":"2026-05-14","scores":{"Bec Byrne":921,"Cassidy Storms":893,"Marta Paterlini":937,"Matthew Chater":869,"Miranda Romer":919,"Phoebe Duckworth":757,"Tavia Hunter":920}},{"date":"2026-05-15","scores":{"Bec Byrne":888,"Cassidy Storms":909,"Marta Paterlini":960,"Matthew Chater":895,"Miranda Romer":974,"Phoebe Duckworth":733,"Tavia Hunter":649}},{"date":"2026-05-18","scores":{"Bec Byrne":949,"Eli Perrett":899,"Marta Paterlini":967,"Matthew Chater":987,"Miranda Romer":958,"Phoebe Duckworth":922,"Sarah Cope":921}},{"date":"2026-05-19","scores":{"Bec Byrne":851,"Eli Perrett":840,"Marta Paterlini":964,"Miranda Romer":766,"Phoebe Duckworth":818}},{"date":"2026-05-20","scores":{"Eli Perrett":833,"Marta Paterlini":952,"Miranda Romer":937,"Sarah Cope":894}},{"date":"2026-05-21","scores":{"Miranda Romer":898}},{"date":"2026-05-22","scores":{"Bec Byrne":650,"Eli Perrett":638,"Marta Paterlini":740,"Miranda Romer":647,"Sarah Cope":615}},{"date":"2026-05-25","scores":{"Bec Byrne":874,"Marta Paterlini":963,"Sarah Cope":916}},{"date":"2026-05-26","scores":{"Bec Byrne":713,"Eli Perrett":843,"Miranda Romer":871,"Sarah Cope":846}},{"date":"2026-05-27","scores":{"Bec Byrne":747,"Eli Perrett":707,"Marta Paterlini":702,"Miranda Romer":819}},{"date":"2026-05-28","scores":{"Bec Byrne":905,"Cassidy Storms":972,"Eli Perrett":969,"Marta Paterlini":964,"Miranda Romer":957,"Phoebe Duckworth":845,"Sarah Cope":951}},{"date":"2026-05-29","scores":{"Cassidy Storms":947,"Eli Perrett":730,"Marta Paterlini":942,"Miranda Romer":803}},{"date":"2026-06-01","scores":{"Eli Perrett":880}},{"date":"2026-06-02","scores":{"Bec Byrne":951,"Eli Perrett":891,"Miranda Romer":955,"Phoebe Duckworth":870,"Sarah Cope":798}},{"date":"2026-06-03","scores":{"Bec Byrne":786,"Eli Perrett":783,"Miranda Romer":883}},{"date":"2026-06-04","scores":{"Bec Byrne":887,"Marta Paterlini":838,"Phoebe Duckworth":854,"Sarah Cope":880}},{"date":"2026-06-05","scores":{"Bec Byrne":897,"Eli Perrett":880,"Marta Paterlini":930,"Matthew Chater":898,"Miranda Romer":910,"Phoebe Duckworth":930,"Sarah Cope":903}},{"date":"2026-06-08","scores":{"Cassidy Storms":955,"Eli Perrett":970,"Marta Paterlini":954,"Matthew Chater":916,"Miranda Romer":919,"Phoebe Duckworth":911}},{"date":"2026-06-09","scores":{"Bec Byrne":805,"Cassidy Storms":900,"Eli Perrett":801,"Marta Paterlini":936,"Miranda Romer":932,"Sarah Cope":790}},{"date":"2026-06-10","scores":{"Bec Byrne":835,"Eli Perrett":912,"Marta Paterlini":919,"Matthew Chater":903,"Miranda Romer":882,"Phoebe Duckworth":924,"Sarah Cope":908}},{"date":"2026-06-11","scores":{"Bec Byrne":958,"Cassidy Storms":969,"Marta Paterlini":924,"Matthew Chater":962,"Miranda Romer":934,"Phoebe Duckworth":937,"Sarah Cope":966,"Tavia Hunter":965}},{"date":"2026-06-12","scores":{"Cassidy Storms":873,"Eli Perrett":686,"Marta Paterlini":954,"Miranda Romer":874,"Phoebe Duckworth":851,"Sarah Cope":853}},{"date":"2026-06-15","scores":{"Bec Byrne":984,"Cassidy Storms":966,"Eli Perrett":944,"Marta Paterlini":863,"Miranda Romer":965,"Phoebe Duckworth":903,"Sarah Cope":841}},{"date":"2026-06-16","scores":{"Bec Byrne":798,"Cassidy Storms":959,"Eli Perrett":931,"Marta Paterlini":815,"Matthew Chater":815,"Miranda Romer":967,"Phoebe Duckworth":880,"Sarah Cope":917}},{"date":"2026-06-18","scores":{"Bec Byrne":843,"Cassidy Storms":898,"Eli Perrett":856,"Marta Paterlini":873,"Matthew Chater":900,"Miranda Romer":854,"Phoebe Duckworth":883,"Sarah Cope":814}},{"date":"2026-06-19","scores":{"Marta Paterlini":932,"Phoebe Duckworth":945,"Sarah Cope":934}},{"date":"2026-06-22","scores":{"Bec Byrne":884,"Cassidy Storms":945,"Eli Perrett":936,"Marta Paterlini":833,"Matthew Chater":857,"Miranda Romer":831,"Sarah Cope":916,"Maciej Kozlowski":935}},{"date":"2026-06-23","scores":{"Cassidy Storms":894,"Marta Paterlini":917,"Miranda Romer":915,"Phoebe Duckworth":927,"Sarah Cope":933,"Maciej Kozlowski":873}},{"date":"2026-06-24","scores":{"Cassidy Storms":892,"Eli Perrett":859,"Marta Paterlini":960,"Matthew Chater":804,"Miranda Romer":881,"Phoebe Duckworth":835,"Maciej Kozlowski":775}},{"date":"2026-06-25","scores":{"Bec Byrne":858,"Cassidy Storms":876,"Marta Paterlini":732,"Matthew Chater":649,"Miranda Romer":652,"Phoebe Duckworth":920,"Sarah Cope":657,"Jordan Samuels":572}},{"date":"2026-06-26","scores":{"Marta Paterlini":478,"Matthew Chater":913,"Phoebe Duckworth":516,"Sarah Cope":758,"Maciej Kozlowski":803}},{"date":"2026-06-29","scores":{"Marta Paterlini":920,"Matthew Chater":866,"Sarah Cope":736,"Maciej Kozlowski":939}},{"date":"2026-06-30","scores":{"Bec Byrne":964,"Cassidy Storms":872,"Eli Perrett":768,"Marta Paterlini":877,"Matthew Chater":791,"Phoebe Duckworth":783,"Sarah Cope":748,"Maciej Kozlowski":834,"Tavia Hunter":797,"Jordan Samuels":571}},{"date":"2026-07-01","scores":{"Bec Byrne":734,"Cassidy Storms":908,"Eli Perrett":698,"Marta Paterlini":874,"Matthew Chater":876,"Phoebe Duckworth":787,"Sarah Cope":777,"Maciej Kozlowski":813,"Tavia Hunter":772,"Jordan Samuels":619}},{"date":"2026-07-02","scores":{"Cassidy Storms":895,"Eli Perrett":901,"Marta Paterlini":836,"Matthew Chater":870,"Phoebe Duckworth":884,"Sarah Cope":847,"Maciej Kozlowski":816,"Tavia Hunter":768,"Jordan Samuels":770}},{"date":"2026-07-06","scores":{"Bec Byrne":687,"Cassidy Storms":972,"Eli Perrett":721,"Miranda Romer":727,"Phoebe Duckworth":689,"Sarah Cope":727,"Maciej Kozlowski":493,"Jordan Samuels":697}},{"date":"2026-07-07","scores":{"Cassidy Storms":912,"Miranda Romer":708,"Maciej Kozlowski":756}},{"date":"2026-07-08","scores":{"Cassidy Storms":921,"Eli Perrett":935,"Matthew Chater":904,"Miranda Romer":916,"Phoebe Duckworth":889,"Sarah Cope":917,"Jordan Samuels":692}},{"date":"2026-07-10","scores":{"Eli Perrett":920,"Miranda Romer":910,"Phoebe Duckworth":818,"Sarah Cope":727,"Maciej Kozlowski":832}},{"date":"2026-07-13","scores":{"Bec Byrne":500,"Eli Perrett":924,"Marta Paterlini":751,"Matthew Chater":688,"Miranda Romer":646,"Sarah Cope":717,"Maciej Kozlowski":697,"Jordan Samuels":549}},{"date":"2026-07-14","scores":{"Cassidy Storms":873,"Eli Perrett":818,"Matthew Chater":849,"Phoebe Duckworth":870,"Sarah Cope":758,"Maciej Kozlowski":851,"Jordan Samuels":722}},{"date":"2026-07-15","scores":{"Bec Byrne":984,"Cassidy Storms":946,"Eli Perrett":968,"Marta Paterlini":960,"Matthew Chater":964,"Miranda Romer":965,"Phoebe Duckworth":964,"Sarah Cope":925,"Tavia Hunter":964,"Jordan Samuels":834}},{"date":"2026-07-16","scores":{"Bec Byrne":850,"Cassidy Storms":884,"Eli Perrett":897,"Marta Paterlini":978,"Matthew Chater":879,"Miranda Romer":940,"Sarah Cope":870}},{"date":"2026-07-17","scores":{"Cassidy Storms":828,"Marta Paterlini":883,"Matthew Chater":790,"Miranda Romer":809,"Phoebe Duckworth":867,"Sarah Cope":885,"Tavia Hunter":861}},{"date":"2026-07-20","scores":{"Cassidy Storms":883,"Eli Perrett":637,"Matthew Chater":718,"Miranda Romer":688}}]};
+
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function monthLabel(key){
+  const [y,m] = key.split('-');
+  return `${MONTH_NAMES[parseInt(m,10)-1]} ${y}`;
+}
+
+// ---- Build per-month, per-player entry lists (chronological) ----
+const byMonth = {};
+DATA.records.forEach(rec => {
+  const mk = rec.date.slice(0,7);
+  if(!byMonth[mk]) byMonth[mk] = {};
+  Object.entries(rec.scores).forEach(([player, score]) => {
+    if(!byMonth[mk][player]) byMonth[mk][player] = [];
+    byMonth[mk][player].push({date: rec.date, score});
+  });
+});
+const monthKeys = Object.keys(byMonth).sort(); // ascending
+const monthKeysDesc = [...monthKeys].reverse();
+const currentMonthKey = monthKeysDesc[0];
+
+const QUALIFY_THRESHOLD = 10;
+
+// Every player appears every month. If they have logged at least QUALIFY_THRESHOLD
+// rounds, their score is the average of their best QUALIFY_THRESHOLD scores that
+// month. If not, their score shows as 0 with a "not enough rounds yet" flag —
+// no round count is ever displayed, so that flag looks identical whether it is
+// their 1st round or their 9th, and only changes once they cross the line.
+function computeMonthBoard(mk){
+  const rows = DATA.players.map(player => {
+    const entries = (byMonth[mk] && byMonth[mk][player]) || [];
+    const qualified = entries.length >= QUALIFY_THRESHOLD;
+    let avg = 0;
+    if(qualified){
+      const top = entries.map(e=>e.score).sort((a,b)=>b-a).slice(0,QUALIFY_THRESHOLD);
+      avg = top.reduce((s,v)=>s+v,0) / top.length;
+    }
+    return { player, avg, qualified };
+  });
+  rows.sort((a,b) => {
+    if(a.qualified !== b.qualified) return a.qualified ? -1 : 1;
+    if(a.qualified) return b.avg - a.avg;
+    return a.player.localeCompare(b.player);
+  });
+  return rows;
+}
+
+const currentStandings = computeMonthBoard(currentMonthKey);
+
+// ---- All-time personal best per player (used as the secondary stat on each row) ----
+const bestByPlayer = {};
+DATA.records.forEach(rec => {
+  Object.entries(rec.scores).forEach(([player, score]) => {
+    if(!bestByPlayer[player] || score > bestByPlayer[player]) bestByPlayer[player] = score;
+  });
+});
+
+// ---- Header eyebrow / snapshot date / month title / countdown ----
+const lastDate = DATA.records[DATA.records.length-1].date;
+document.getElementById('month-title').textContent = monthLabel(currentMonthKey);
+document.getElementById('updated-tag').textContent =
+  'Last updated ' + new Date(lastDate+'T00:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+const today = new Date();
+const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+const daysLeft = Math.max(0, Math.ceil((monthEnd - today) / 86400000));
+const countdownText = daysLeft === 0 ? '🔥 Last day of the month!'
+  : daysLeft === 1 ? '🔥 1 day left this month'
+  : `🔥 ${daysLeft} days left this month`;
+document.getElementById('countdown-sub').textContent = countdownText;
+
+// ---- Player stats popup ----
+const statsByPlayer = {};
+DATA.players.forEach(player => {
+  const allEntries = [];
+  DATA.records.forEach(rec => {
+    if(rec.scores[player] !== undefined) allEntries.push({date: rec.date, score: rec.scores[player]});
+  });
+  const gamesPlayed = allEntries.length;
+  const totalAvg = gamesPlayed ? allEntries.reduce((s,e)=>s+e.score,0) / gamesPlayed : 0;
+
+  const thisMonthEntries = (byMonth[currentMonthKey] && byMonth[currentMonthKey][player]) || [];
+  const thisMonthAvg = thisMonthEntries.length
+    ? thisMonthEntries.reduce((s,e)=>s+e.score,0) / thisMonthEntries.length
+    : null;
+
+  let monthsWon = 0;
+  monthKeysDesc.slice(1).forEach(mk => {
+    const board = computeMonthBoard(mk);
+    if(board.length && board[0].qualified && board[0].player === player) monthsWon++;
+  });
+
+  statsByPlayer[player] = {
+    gamesPlayed, totalAvg, thisMonthAvg, monthsWon,
+    gamesThisMonth: thisMonthEntries.length,
+    best: bestByPlayer[player] || 0
+  };
+});
+
+const playerOverlay = document.getElementById('player-overlay');
+function openPlayerModal(player){
+  const s = statsByPlayer[player];
+  document.getElementById('player-name-title').textContent = player;
+  const monthAvgText = s.thisMonthAvg !== null ? s.thisMonthAvg.toFixed(1) : 'No games yet';
+  document.getElementById('player-stats').innerHTML = `
+    <div class="stat-tile"><div class="stat-num">${s.totalAvg.toFixed(1)}</div><div class="stat-lbl">All-Time Avg</div></div>
+    <div class="stat-tile"><div class="stat-num">${monthAvgText}</div><div class="stat-lbl">This Month Avg</div></div>
+    <div class="stat-tile"><div class="stat-num">${s.monthsWon}</div><div class="stat-lbl">Months Won</div></div>
+    <div class="stat-tile"><div class="stat-num">${s.gamesPlayed}</div><div class="stat-lbl">Games Played</div></div>
+    <div class="stat-tile"><div class="stat-num">${s.best}</div><div class="stat-lbl">Personal Best</div></div>
+    <div class="stat-tile"><div class="stat-num">${s.gamesThisMonth}</div><div class="stat-lbl">Games This Month</div></div>
+  `;
+  openModal(playerOverlay);
+}
+
+// ---- Generic board renderer (current month + past months use the same rows) ----
+const MEDALS = ['🏆','🥈','🥉'];
+function renderBoard(el, standings){
+  el.innerHTML = '';
+  let rank = 0;
+  standings.forEach(row => {
+    const div = document.createElement('div');
+    let classes = 'row';
+    let badgeContent, statHtml, medalHtml = '';
+    if(row.qualified){
+      rank++;
+      if(rank === 1) classes += ' rank-1';
+      else if(rank === 2) classes += ' rank-2';
+      else if(rank === 3) classes += ' rank-3';
+      if(rank <= 3) medalHtml = `<span class="medal">${MEDALS[rank-1]}</span>`;
+      badgeContent = rank;
+      statHtml = `<div class="num">${row.avg.toFixed(1)}</div><div class="lbl">avg top ${QUALIFY_THRESHOLD}</div>`;
+    } else {
+      classes += ' unqualified';
+      badgeContent = '–';
+      statHtml = `<div class="num zero">0</div><div class="lbl">not enough rounds</div>`;
+    }
+    div.className = classes;
+    div.style.animationDelay = (rank * 0.04) + 's';
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('role', 'button');
+    div.setAttribute('aria-label', `${row.player}, tap for full stats`);
+    div.innerHTML = `
+      <div class="badge"><span>${badgeContent}</span></div>
+      <div class="who"><div class="name">${row.player}${medalHtml}</div></div>
+      <div class="stats">
+        <div class="stat main">${statHtml}</div>
+      </div>
+      <div class="tap-hint">›</div>
+    `;
+    div.addEventListener('click', () => openPlayerModal(row.player));
+    div.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPlayerModal(row.player); }
+    });
+    div.addEventListener('animationend', () => { div.style.animation = 'none'; }, { once: true });
+    el.appendChild(div);
+  });
+}
+
+renderBoard(document.getElementById('standings'), currentStandings);
+
+// ---- Past months: every month with data shown at once as a compact card (top 3 each) ----
+const archiveBoardEl = document.getElementById('archive-board');
+const pastMonths = monthKeysDesc.slice(1).filter(mk => computeMonthBoard(mk).some(r => r.qualified));
+
+function renderMonthCard(mk){
+  const top3 = computeMonthBoard(mk).filter(r => r.qualified).slice(0,3);
+  const card = document.createElement('div');
+  card.className = 'month-card';
+
+  const head = document.createElement('div');
+  head.className = 'month-card-head';
+  head.textContent = monthLabel(mk);
+  card.appendChild(head);
+
+  top3.forEach((row, i) => {
+    const r = document.createElement('div');
+    r.className = `mc-row mc-${i+1}`;
+    r.innerHTML = `
+      <div class="mc-badge">${MEDALS[i]}</div>
+      <span class="mc-name">${row.player}</span>
+      <span class="mc-score">${row.avg.toFixed(1)}</span>
+    `;
+    card.appendChild(r);
+  });
+  return card;
+}
+
+if(pastMonths.length === 0){
+  archiveBoardEl.innerHTML = '<div class="empty-note">No past months yet — check back once this one wraps.</div>';
+} else {
+  const VISIBLE_LIMIT = 4;
+  const cards = pastMonths.map(mk => renderMonthCard(mk));
+  cards.forEach((card, i) => {
+    if(i >= VISIBLE_LIMIT) card.classList.add('hidden-month');
+    archiveBoardEl.appendChild(card);
+  });
+
+  if(pastMonths.length > VISIBLE_LIMIT){
+    const wrap = document.getElementById('show-more-wrap');
+    const btn = document.createElement('button');
+    btn.className = 'show-more-btn';
+    const hiddenCount = pastMonths.length - VISIBLE_LIMIT;
+    let expanded = false;
+    const setLabel = () => { btn.textContent = expanded ? '▲ Show less' : `▼ Show ${hiddenCount} more month${hiddenCount === 1 ? '' : 's'}`; };
+    setLabel();
+    btn.addEventListener('click', () => {
+      expanded = !expanded;
+      cards.forEach((card, i) => {
+        if(i >= VISIBLE_LIMIT) card.classList.toggle('hidden-month', !expanded);
+      });
+      setLabel();
+    });
+    wrap.appendChild(btn);
+  }
+}
+
+// ---- Trophy cabinet: only players who have won a month, most wins first ----
+const cabinetEl = document.getElementById('cabinet');
+const winners = DATA.players
+  .map(p => ({ player: p, wins: statsByPlayer[p].monthsWon }))
+  .filter(w => w.wins > 0)
+  .sort((a, b) => b.wins - a.wins || a.player.localeCompare(b.player));
+
+if(winners.length === 0){
+  cabinetEl.innerHTML = '<div class="cabinet-empty">No champions crowned yet — win a month to claim the first trophy! 🏆</div>';
+} else {
+  winners.forEach(w => {
+    const row = document.createElement('div');
+    row.className = 'cab-row';
+    row.innerHTML = `
+      <span class="cab-name">${w.player}</span>
+      <span class="cab-trophies">${'🏆'.repeat(w.wins)}</span>
+      <span class="cab-count">${w.wins} ${w.wins === 1 ? 'win' : 'wins'}</span>
+    `;
+    cabinetEl.appendChild(row);
+  });
+}
+
+// ---- Compare players: sortable stat table ----
+const COMPARE_COLS = [
+  { key: 'player',        label: 'Player',      type: 'text', get: p => p },
+  { key: 'monthsWon',     label: 'Wins',        type: 'num',  get: p => statsByPlayer[p].monthsWon },
+  { key: 'totalAvg',      label: 'All-Time Avg',type: 'num',  get: p => statsByPlayer[p].totalAvg, fmt: v => v.toFixed(1) },
+  { key: 'thisMonthAvg',  label: 'Current Month Avg', type: 'num', get: p => statsByPlayer[p].thisMonthAvg ?? -1, fmt: v => v < 0 ? '—' : v.toFixed(1) },
+  { key: 'gamesPlayed',   label: 'Total Games Played', type: 'num', get: p => statsByPlayer[p].gamesPlayed },
+  { key: 'gamesThisMonth',label: 'Games Current Month', type: 'num', get: p => statsByPlayer[p].gamesThisMonth },
+  { key: 'best',          label: 'Personal Best', type: 'num', get: p => statsByPlayer[p].best },
+];
+
+const compareTable = document.getElementById('compare-table');
+let sortKey = 'monthsWon';
+let sortDir = -1; // -1 = descending, 1 = ascending
+
+function renderCompareTable(){
+  const col = COMPARE_COLS.find(c => c.key === sortKey);
+  const sorted = [...DATA.players].sort((a, b) => {
+    const va = col.get(a), vb = col.get(b);
+    if(col.type === 'text') return sortDir * String(va).localeCompare(String(vb));
+    if(va !== vb) return sortDir * (va - vb);
+    return statsByPlayer[a].totalAvg === statsByPlayer[b].totalAvg ? 0 : (statsByPlayer[b].totalAvg - statsByPlayer[a].totalAvg);
+  });
+
+  const head = COMPARE_COLS.map(c => {
+    const isSorted = c.key === sortKey;
+    const glyph = isSorted ? (sortDir === -1 ? '▼' : '▲') : '▼';
+    // Arrow is absolutely positioned in CSS, so it never affects label centring or wrapping.
+    const arrow = `<span class="arrow${isSorted ? '' : ' arrow-hidden'}">${glyph}</span>`;
+    const ariaSort = isSorted ? (sortDir === -1 ? 'descending' : 'ascending') : 'none';
+    return `<th data-key="${c.key}" class="${isSorted ? 'sorted' : ''}" tabindex="0" role="columnheader" aria-sort="${ariaSort}">${c.label}${arrow}</th>`;
+  }).join('');
+
+  const body = sorted.map(p => {
+    const cells = COMPARE_COLS.map(c => {
+      const raw = c.get(p);
+      const val = c.fmt ? c.fmt(raw) : raw;
+      return `<td>${val}</td>`;
+    }).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+
+  compareTable.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body}</tbody>`;
+
+  function applySort(key){
+    const clickedCol = COMPARE_COLS.find(c => c.key === key);
+    if(key === sortKey){
+      sortDir *= -1;
+    } else {
+      sortKey = key;
+      sortDir = clickedCol.type === 'text' ? 1 : -1; // text sorts A→Z, numbers high→low
+    }
+    renderCompareTable();
+  }
+
+  compareTable.querySelectorAll('thead th').forEach(th => {
+    th.addEventListener('click', () => applySort(th.dataset.key));
+    th.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); applySort(th.dataset.key); }
+    });
+  });
+}
+renderCompareTable();
+
+// ---- Modals: open/close wiring ----
+let lastFocused = null;
+function openModal(overlay){
+  lastFocused = document.activeElement;
+  overlay.classList.add('open');
+  const closeBtn = overlay.querySelector('.modal-close');
+  if(closeBtn) closeBtn.focus();
+}
+function closeModal(overlay){
+  overlay.classList.remove('open');
+  if(lastFocused && lastFocused.focus) lastFocused.focus();
+}
+
+function wireModal(overlayId, closeId, openTriggerId){
+  const overlay = document.getElementById(overlayId);
+  document.getElementById(closeId).addEventListener('click', () => closeModal(overlay));
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(overlay); });
+  if(openTriggerId){
+    document.getElementById(openTriggerId).addEventListener('click', () => openModal(overlay));
+  }
+}
+wireModal('rules-overlay', 'rules-close', 'rules-btn');
+wireModal('player-overlay', 'player-close', null);
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    document.querySelectorAll('.modal-overlay.open').forEach(o => closeModal(o));
+  }
+});
+
+document.getElementById('footer-note').textContent = 'Binyan Map Tappers Leaderboard · scores sourced from the team scoreboard';
+
+</script>
+</body>
+</html>
